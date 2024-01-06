@@ -7,14 +7,19 @@ import (
 	"fmt"
 	"log"
 
+	// "time"
+
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcap"
 )
 
 func main() {
+
+	go UDP_Handler()
+
 	// 打开网络接口
-	handle, err := pcap.OpenLive("wlp3s0", 65535, true, pcap.BlockForever)
+	handle, err := pcap.OpenLive("enp2s0", 65535, true, pcap.BlockForever)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -58,7 +63,7 @@ func main() {
 		if tcpLayer != nil {
 			tcp, _ := tcpLayer.(*layers.TCP)
 			if tcp.SYN && tcp.ACK {
-				fmt.Println(mtext, "连接建立")
+				fmt.Println(mtext, "连接建立", tcp.Ack)
 			} else if tcp.FIN && tcp.ACK {
 				fmt.Println(mtext, "连接关闭")
 			} else if tcp.RST {
@@ -67,5 +72,41 @@ func main() {
 				fmt.Println(mtext, "连接正常")
 			}
 		}
+	}
+}
+
+func UDP_Handler() {
+	// 打开网络接口
+	handle, err := pcap.OpenLive("lo", 65535, true, pcap.BlockForever)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer handle.Close()
+
+	// 设置过滤器，只抓取TCP协议的数据包
+	filter := "icmp"
+	err = handle.SetBPFFilter(filter)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// 开始抓包
+	packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
+	for packet := range packetSource.Packets() {
+		switch packet.NetworkLayer().(type) {
+		case (*layers.IPv6):
+			{
+				fmt.Println("skipped ipv6 packet") //skip ipv6
+				continue
+			}
+
+		default:
+			{
+				//nothing
+			}
+		}
+
+		fmt.Println(packet.String())
+
 	}
 }
