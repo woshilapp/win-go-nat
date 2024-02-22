@@ -1,7 +1,7 @@
 // wtf it's
 // go is a good language
 // but its format too strict
-package main
+// package main
 
 import (
 	"fmt"
