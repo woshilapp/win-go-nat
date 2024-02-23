@@ -1,4 +1,4 @@
-module win-go-nat
+module github.com/woshilapp/win-go-nat
 
 go 1.21.4
 

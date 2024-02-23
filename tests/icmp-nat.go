@@ -1,4 +1,6 @@
-package main
+package tests
+
+//static nat
 
 import (
 	"fmt"
@@ -209,7 +211,9 @@ func B_Handler(handle *pcap.Handle, t_handle *pcap.Handle) {
 	}
 }
 
-func main() {
+// func main() {
+
+func Start() {
 	// 打开网络接口
 	a_handle, err := pcap.OpenLive("virbr1", 65535, true, pcap.BlockForever)
 	if err != nil {
