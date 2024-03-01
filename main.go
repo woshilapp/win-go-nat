@@ -11,5 +11,6 @@ func main() {
 	// tests.Start()
 	// tests.Icmpid_launch_catch()
 
-	fmt.Println(Is_inside("8.8.8.8"))
+	// fmt.Println(Is_inside("8.8.8.8"))
+	Arp_Start()
 }
