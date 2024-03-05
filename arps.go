@@ -7,11 +7,13 @@ import (
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcap"
+
+	"github.com/woshilapp/win-go-nat/globals"
 )
 
-func Arp_Start() {
+func Arp_Handle(if_name string) {
 	// 打开网络设备以进行数据包捕获
-	handle, err := pcap.OpenLive("enp2s0", 1600, true, pcap.BlockForever)
+	handle, err := pcap.OpenLive(if_name, 1600, true, pcap.BlockForever)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -23,13 +25,9 @@ func Arp_Start() {
 		log.Fatal(err)
 	}
 
-	// 初始化ARP缓存
-	arpCache := make(map[string]string)
-
 	// 开始捕获数据包
 	packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
 	for packet := range packetSource.Packets() {
-		// 检查数据包是否为ARP数据包
 		arpLayer := packet.Layer(layers.LayerTypeARP)
 		arpPacket, _ := arpLayer.(*layers.ARP)
 
@@ -40,11 +38,11 @@ func Arp_Start() {
 			arpPacket.SourceHwAddress[2], arpPacket.SourceHwAddress[3], arpPacket.SourceHwAddress[4], arpPacket.SourceHwAddress[5])
 
 		// 使用新条目更新或刷新ARP缓存
-		arpCache[ip] = mac
+		globals.Arp_Maps[ip] = mac
 
 		// 打印ARP缓存
 		fmt.Println("ARP 缓存:")
-		for ip, mac := range arpCache {
+		for ip, mac := range globals.Arp_Maps {
 			fmt.Printf("IP: %s, MAC: %s\n", ip, mac)
 		}
 		fmt.Println("--------------")
