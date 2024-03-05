@@ -6,5 +6,5 @@ import (
 
 func Init() {
 	globals.Ins_if = "virbr1"
-	globals.Out_if = "enp1s0"
+	globals.Out_if = "enp2s0"
 }

@@ -9,6 +9,8 @@ import (
 )
 
 func main() {
+	Init()
+
 	fmt.Println("started")
 
 	// tests.Start()

@@ -1,8 +1,8 @@
 package globals
 
 var (
-	Ins_if = "virbr1"
-	Out_if = "enp2s0"
+	Ins_if = ""
+	Out_if = ""
 
 	Arp_Maps = make(map[string]string)
 )
