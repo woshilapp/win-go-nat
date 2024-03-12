@@ -48,3 +48,15 @@ func Arp_Handle(if_name string) {
 		fmt.Println("--------------")
 	}
 }
+
+func Get_Mac_Addr(IPAddr string) interface{} {
+
+	if globals.Arp_Maps[IPAddr] == "" {
+		//send arp packet
+
+	} else {
+		return globals.Arp_Maps[IPAddr]
+	}
+
+	return nil
+}
