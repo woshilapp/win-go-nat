@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	// "net"
+
 	"time"
 
 	"github.com/woshilapp/win-go-nat/globals"
@@ -12,13 +14,17 @@ func main() {
 	Init()
 
 	fmt.Println("started")
+	fmt.Println(globals.Ins_IP, globals.Ins_Mac)
+	fmt.Println(globals.Out_IP, globals.Out_Mac)
+
+	// tests.Timeout_ip()
 
 	// tests.Start()
 	// tests.Icmpid_launch_catch()
 
 	// fmt.Println(Is_inside("8.8.8.8"))
-	go Arp_Handle(globals.Ins_if)
-	go Arp_Handle(globals.Out_if)
+	go Arp_Handle(globals.Ins_Handle)
+	go Arp_Handle(globals.Out_Handle)
 	// Route()
 
 	for {

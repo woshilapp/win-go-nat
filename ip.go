@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net"
 	"strconv"
 	"strings"
 )
@@ -34,4 +35,37 @@ func Is_inside(ip_addr string) bool {
 	}
 
 	return false
+}
+
+func Get_IPv4_MAC_Ifname(interfaceName string) (net.HardwareAddr, net.IP) {
+	// 获取接口信息
+	ifi, err := net.InterfaceByName(interfaceName)
+	if err != nil {
+		// fmt.Println("Error:", err)
+		return nil, nil
+	}
+
+	// 获取接口的 MAC 地址
+	macAddr := ifi.HardwareAddr
+	// fmt.Println("MAC 地址:", macAddr)
+
+	var ipAddr net.IP
+
+	// 获取接口的 IPv4 地址
+	addrs, err := ifi.Addrs()
+	if err != nil {
+		// fmt.Println("Error:", err)
+		return nil, nil
+	}
+	for _, addr := range addrs {
+		if ipNet, ok := addr.(*net.IPNet); ok && !ipNet.IP.IsLoopback() {
+			if ipNet.IP.To4() != nil {
+				// fmt.Println("IPv4 地址:", ipNet.IP)
+				ipAddr = ipNet.IP
+				break
+			}
+		}
+	}
+
+	return macAddr, ipAddr
 }
