@@ -20,10 +20,9 @@ import (
 // 	return smac
 // }
 
-func SParseIP(ip_addr string) []byte {
-	ip := net.ParseIP(ip_addr).To4()
+func SParseIP(ip net.IP) []byte {
 	sip := make([]byte, 4)
-	copy(sip[:], ip)
+	copy(sip[:], ip.To4())
 	return sip
 }
 
@@ -41,9 +40,9 @@ func buildARPPacket(srcMAC net.HardwareAddr, srcIP, targetIP net.IP) []byte {
 		ProtAddressSize:   4,
 		Operation:         layers.ARPRequest,
 		SourceHwAddress:   srcMAC,
-		SourceProtAddress: SParseIP(srcIP.String()),
+		SourceProtAddress: SParseIP(srcIP),
 		DstHwAddress:      net.HardwareAddr{0, 0, 0, 0, 0, 0}, // 目标 MAC 地址为 0
-		DstProtAddress:    SParseIP(targetIP.String()),
+		DstProtAddress:    SParseIP(targetIP),
 	}
 
 	buffer := gopacket.NewSerializeBuffer()
@@ -80,11 +79,11 @@ func Arp_Handle(handle *pcap.Handle) {
 			globals.Arp_Maps[ip] = mac
 
 			// 打印ARP缓存
-			fmt.Println("ARP 缓存:")
-			for ip, mac := range globals.Arp_Maps {
-				fmt.Printf("IP: %s, MAC: %s\n", ip, mac)
-			}
-			fmt.Println("--------------")
+			// fmt.Println("ARP 缓存:")
+			// for ip, mac := range globals.Arp_Maps {
+			// 	fmt.Printf("IP: %s, MAC: %s\n", ip, mac)
+			// }
+			// fmt.Println("--------------")
 		}
 	}
 }

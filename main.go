@@ -28,7 +28,10 @@ func main() {
 	// Route()
 
 	for {
-		ma := Get_Mac_Addr("192.168.10.1")
+		// ma := Get_Mac_Addr("192.168.10.1")
+		a := ""
+		fmt.Scanf("%s", &a)
+		ma := Get_Mac_Addr(a)
 		fmt.Printf("%T %s\n", ma, ma)
 		time.Sleep(time.Second * 5)
 	}
