@@ -3,18 +3,14 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"net"
 	"os/exec"
 	"runtime"
 	"strconv"
 	"strings"
-)
 
-type routeItem struct {
-	Destination string
-	Gateway     string
-	Mask        string
-	Ifname      string
-}
+	"github.com/woshilapp/win-go-nat/globals"
+)
 
 func hexToIPv4(hexStr string) string {
 	ip := make([]string, 4)
@@ -32,7 +28,7 @@ func hexToIPv4(hexStr string) string {
 	return strings.Join(ip, ".")
 }
 
-func Route() {
+func Get_Route() {
 	var cmd *exec.Cmd
 	switch runtime.GOOS {
 	case "linux":
@@ -52,7 +48,6 @@ func Route() {
 		return
 	}
 
-	var routes []routeItem
 	scanner := bufio.NewScanner(strings.NewReader(string(output)))
 
 	switch runtime.GOOS {
@@ -65,14 +60,17 @@ func Route() {
 				continue
 			}
 
-			route := routeItem{
+			route := globals.RouteItem{
 				Destination: hexToIPv4(fields[1]),
 				Gateway:     hexToIPv4(fields[2]),
 				Mask:        hexToIPv4(fields[7]),
 				Ifname:      fields[0],
 			}
 
-			routes = append(routes, route)
+			if route.Ifname == globals.Out_if {
+				globals.Routes = append(globals.Routes, route)
+			}
+
 		}
 	case "darwin":
 		// Skip the header lines
@@ -84,25 +82,70 @@ func Route() {
 				continue
 			}
 
-			route := routeItem{
+			route := globals.RouteItem{
 				Destination: fields[0],
 				Gateway:     fields[2],
 				Mask:        fields[3],
 				Ifname:      fields[len(fields)-1],
 			}
 
-			routes = append(routes, route)
+			globals.Routes = append(globals.Routes, route)
 		}
 	case "windows":
-		//fk windows
+		// package main
+
+		// import (
+		// 	"fmt"
+		// 	"github.com/StackExchange/wmi"
+		// )
+
+		// type Win32_IP4RouteTable struct {
+		// 	Destination string
+		// 	InterfaceIndex int
+		// 	NextHop string
+		// 	Metric1 uint
+		// }
+
+		// func main() {
+		// 	var routes []Win32_IP4RouteTable
+		// 	query := "SELECT Destination, InterfaceIndex, NextHop, Metric1 FROM Win32_IP4RouteTable"
+		// 	err := wmi.Query(query, &routes)
+		// 	if err != nil {
+		// 		fmt.Println("Error querying Win32_IP4RouteTable:", err)
+		// 		return
+		// 	}
+
+		// 	fmt.Println("Windows Route Table:")
+		// 	for _, route := range routes {
+		// 		fmt.Printf("Destination: %s, InterfaceIndex: %d, NextHop: %s, Metric1: %d\n", route.Destination, route.InterfaceIndex, route.NextHop, route.Metric1)
+		// 	}
+		// }
+		// 	}
+
+		// 	if err := scanner.Err(); err != nil {
+		// 		fmt.Println("Error reading command output:", err)
+		// 		return
+		// 	}
+
+		// 	for _, route := range globals.Routes {
+		// 		fmt.Printf("Destination: %s, Gateway: %s, Mask: %s, Interface: %s\n", route.Destination, route.Gateway, route.Mask, route.Ifname)
+		// 	}
+		// }
+	}
+}
+
+func CheckRouteTable(ip string) string {
+	ipAddr := net.ParseIP(ip)
+	if ipAddr == nil {
+		return ip // 无效的IP地址，直接返回
 	}
 
-	if err := scanner.Err(); err != nil {
-		fmt.Println("Error reading command output:", err)
-		return
+	for _, entry := range globals.Routes {
+		_, ipNet, _ := net.ParseCIDR(entry.Destination + "/" + entry.Mask)
+		if ipNet.Contains(ipAddr) {
+			return entry.Gateway // IP地址匹配路由表项，返回下一跳地址
+		}
 	}
 
-	for _, route := range routes {
-		fmt.Printf("Destination: %s, Gateway: %s, Mask: %s, Interface: %s\n", route.Destination, route.Gateway, route.Mask, route.Ifname)
-	}
+	return ip // 未匹配任何路由表项，返回原始IP地址
 }

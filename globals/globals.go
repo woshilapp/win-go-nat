@@ -6,6 +6,13 @@ import (
 	"github.com/google/gopacket/pcap"
 )
 
+type RouteItem struct {
+	Destination string
+	Gateway     string
+	Mask        string
+	Ifname      string
+}
+
 var (
 	Ins_if = ""
 	Out_if = ""
@@ -19,4 +26,6 @@ var (
 	Out_IP  net.IP
 
 	Arp_Maps = make(map[string]string)
+
+	Routes []RouteItem
 )

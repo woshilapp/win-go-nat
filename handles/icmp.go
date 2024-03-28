@@ -20,16 +20,32 @@ func (icmp *ICMP_handle) Get_src() string {
 	return icmp.Src_IP
 }
 
-func (icmp *ICMP_handle) Start_Handle() {
-	bpf, err := pcap.NewBPF(layers.LinkTypeEthernet, 1600, "icmp")
+func (I *ICMP_handle) Start_Handle() {
+	bpf_in, err := pcap.NewBPF(layers.LinkTypeEthernet, 1600, "icmp")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	packetSource := gopacket.NewPacketSource(globals.Ins_Handle, globals.Ins_Handle.LinkType())
-	for packet := range packetSource.Packets() {
-		if bpf.Matches(packet.Metadata().CaptureInfo, packet.Data()) {
-			//do sth.
-		}
+	bpf_out, err := pcap.NewBPF(layers.LinkTypeEthernet, 1600, "icmp")
+	if err != nil {
+		log.Fatal(err)
 	}
+
+	go func() {
+		packetSource := gopacket.NewPacketSource(globals.Ins_Handle, globals.Ins_Handle.LinkType())
+		for packet := range packetSource.Packets() {
+			if bpf_in.Matches(packet.Metadata().CaptureInfo, packet.Data()) {
+				//do sth.
+			}
+		}
+	}()
+
+	go func() {
+		packetSource := gopacket.NewPacketSource(globals.Out_Handle, globals.Out_Handle.LinkType())
+		for packet := range packetSource.Packets() {
+			if bpf_out.Matches(packet.Metadata().CaptureInfo, packet.Data()) {
+				//do sth.
+			}
+		}
+	}()
 }
